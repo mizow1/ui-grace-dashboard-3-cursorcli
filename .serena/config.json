@@ -1,0 +1,28 @@
+{
+  "name": "UI Grace Dashboard",
+  "description": "UIコンポーネントとデザインシステムのダッシュボード",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ui-grace-dashboard"
+  },
+  "main_technologies": [
+    "React",
+    "TypeScript",
+    "Tailwind CSS"
+  ],
+  "project_structure": {
+    "src/": "ソースコード",
+    "components/": "UIコンポーネント",
+    "pages/": "ページコンポーネント",
+    "styles/": "スタイルファイル",
+    "utils/": "ユーティリティ関数"
+  },
+  "development": {
+    "port": 3000,
+    "build_command": "npm run build",
+    "dev_command": "npm run dev",
+    "test_command": "npm test"
+  }
+}
