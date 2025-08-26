@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,7 @@ export default function Domains() {
   const [newDomain, setNewDomain] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const navigate = useNavigate();
+  const { refreshDomains } = useDomain();
 
   useEffect(() => {
     setDomains(loadDomains());
@@ -96,6 +98,7 @@ export default function Domains() {
     const updatedDomains = [...domains, domain];
     setDomains(updatedDomains);
     saveDomains(updatedDomains);
+    refreshDomains(); // ドメインコンテキストを更新
     
     setNewDomain("");
     setNewDescription("");

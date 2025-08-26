@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +105,7 @@ export default function ArticleCreation() {
   const [editingContent, setEditingContent] = useState<PageContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [newPageDialog, setNewPageDialog] = useState(false);
+  const { selectedDomain } = useDomain();
   const [newPageForm, setNewPageForm] = useState({
     title: "",
     description: "",
@@ -240,15 +243,18 @@ export default function ArticleCreation() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">記事提案・作成</h1>
-          <p className="text-muted-foreground">
-            実装予定のページとユーザー追加ページのコンテンツを提案・作成します
-          </p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <AdminHeader title="記事提案・作成" />
+      
+      <main className="container mx-auto p-6 space-y-6">
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">記事提案・作成</h1>
+            <p className="text-muted-foreground">
+              {selectedDomain ? `${selectedDomain.domain} の` : ''}実装予定のページとユーザー追加ページのコンテンツを提案・作成します
+            </p>
+          </div>
         <Dialog open={newPageDialog} onOpenChange={setNewPageDialog}>
           <DialogTrigger asChild>
             <Button>
@@ -497,6 +503,7 @@ export default function ArticleCreation() {
           </CardContent>
         </Card>
       </div>
+      </main>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ export default function ContentSuggestions() {
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { selectedDomain } = useDomain();
   
   // Form states
   const [topic, setTopic] = useState("");

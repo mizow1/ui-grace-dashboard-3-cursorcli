@@ -1,4 +1,4 @@
-import { Bell, Search, User, Settings, LogOut, Menu } from "lucide-react";
+import { Bell, Search, User, Settings, LogOut, Menu, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,14 +9,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useDomain } from "@/contexts/DomainContext";
 
 interface AdminHeaderProps {
   title?: string;
 }
 
 export function AdminHeader({ title = "ダッシュボード" }: AdminHeaderProps) {
+  const { selectedDomain, availableDomains, setSelectedDomain } = useDomain();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-6 gap-4">
@@ -27,6 +37,35 @@ export function AdminHeader({ title = "ダッシュボード" }: AdminHeaderProp
         <div className="hidden lg:block">
           <h1 className="text-xl font-semibold text-foreground">{title}</h1>
         </div>
+
+        {/* Domain Selector */}
+        {availableDomains.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <Select
+              value={selectedDomain?.id || ""}
+              onValueChange={(value) => {
+                const domain = availableDomains.find(d => d.id === value);
+                setSelectedDomain(domain || null);
+              }}
+            >
+              <SelectTrigger className="w-[200px] bg-muted/50 border-border">
+                <SelectValue 
+                  placeholder="ドメインを選択" 
+                >
+                  {selectedDomain?.domain || "ドメインを選択"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {availableDomains.map((domain) => (
+                  <SelectItem key={domain.id} value={domain.id}>
+                    {domain.domain}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="flex-1 max-w-md mx-4">

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,15 +62,18 @@ export default function CompetitorAnalysis() {
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [domains, setDomains] = useState<SeoDomain[]>([]);
+  const { selectedDomain } = useDomain();
 
   useEffect(() => {
     // Load domains
     setDomains(loadDomains());
     
-    // Check for domain parameter from URL
+    // Check for domain parameter from URL or selected domain
     const domainParam = searchParams.get("domain");
     if (domainParam) {
       setTargetDomain(domainParam);
+    } else if (selectedDomain) {
+      setTargetDomain(selectedDomain.domain);
     }
 
     // Load stored API key
@@ -77,7 +81,7 @@ export default function CompetitorAnalysis() {
     if (storedApiKey) {
       setApiKey(storedApiKey);
     }
-  }, [searchParams]);
+  }, [searchParams, selectedDomain]);
 
   const handleAnalyze = async () => {
     if (!targetDomain || !competitorUrl || !apiKey) {

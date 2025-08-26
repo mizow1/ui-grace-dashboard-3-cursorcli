@@ -1,6 +1,10 @@
+import { useState, useEffect } from "react";
 import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { StatsCard } from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Users, 
   TrendingUp, 
@@ -9,53 +13,152 @@ import {
   BarChart3,
   Calendar,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Globe,
+  Eye,
+  MousePointer
 } from "lucide-react";
+import { SeoDomain } from "./Domains";
+
+// Storage helper for domains
+const loadDomains = (): SeoDomain[] => {
+  try {
+    const stored = localStorage.getItem("seo-domains");
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
 
 export default function Dashboard() {
-  const statsData = [
-    {
-      title: "総ユーザー数",
-      value: "2,847",
-      change: "+12.5%",
-      changeType: "increase" as const,
-      icon: Users,
-      iconColor: "text-primary"
-    },
-    {
-      title: "月間売上",
-      value: "¥1,234,567",
-      change: "+8.2%",
-      changeType: "increase" as const,
-      icon: DollarSign,
-      iconColor: "text-success"
-    },
-    {
-      title: "アクティブセッション",
-      value: "432",
-      change: "-2.1%",
-      changeType: "decrease" as const,
-      icon: Activity,
-      iconColor: "text-warning"
-    },
-    {
-      title: "成長率",
-      value: "24.8%",
-      change: "+4.3%",
-      changeType: "increase" as const,
-      icon: TrendingUp,
-      iconColor: "text-primary"
+  const { selectedDomain, availableDomains } = useDomain();
+  const [domains, setDomains] = useState<SeoDomain[]>([]);
+  useEffect(() => {
+    setDomains(loadDomains());
+  }, []);
+
+  const getStatsData = () => {
+    if (!selectedDomain) {
+      return [
+        {
+          title: "登録ドメイン数",
+          value: availableDomains.length.toString(),
+          change: "+新規登録",
+          changeType: "increase" as const,
+          icon: Globe,
+          iconColor: "text-primary"
+        },
+        {
+          title: "分析済みドメイン",
+          value: availableDomains.filter(d => d.lastAnalyzed).length.toString(),
+          change: "今月実行",
+          changeType: "increase" as const,
+          icon: BarChart3,
+          iconColor: "text-success"
+        },
+        {
+          title: "平均SEOスコア",
+          value: availableDomains.length > 0 && availableDomains.some(d => d.seoScore)
+            ? Math.round(availableDomains.filter(d => d.seoScore).reduce((acc, d) => acc + (d.seoScore || 0), 0) / availableDomains.filter(d => d.seoScore).length).toString()
+            : "--",
+          change: "全ドメイン平均",
+          changeType: "increase" as const,
+          icon: TrendingUp,
+          iconColor: "text-warning"
+        },
+        {
+          title: "要改善ドメイン",
+          value: availableDomains.filter(d => d.seoScore && d.seoScore < 70).length.toString(),
+          change: "改善が必要",
+          changeType: "decrease" as const,
+          icon: AlertTriangle,
+          iconColor: "text-destructive"
+        }
+      ];
     }
-  ];
+
+    // 選択されたドメインの統計（モック）
+    return [
+      {
+        title: "月間訪問者数",
+        value: (Math.floor(Math.random() * 50000) + 10000).toLocaleString(),
+        change: "+12.5%",
+        changeType: "increase" as const,
+        icon: Users,
+        iconColor: "text-primary"
+      },
+      {
+        title: "ページビュー",
+        value: (Math.floor(Math.random() * 200000) + 50000).toLocaleString(),
+        change: "+8.2%",
+        changeType: "increase" as const,
+        icon: Eye,
+        iconColor: "text-success"
+      },
+      {
+        title: "直帰率",
+        value: `${Math.floor(Math.random() * 40) + 30}%`,
+        change: "-2.1%",
+        changeType: "decrease" as const,
+        icon: Activity,
+        iconColor: "text-warning"
+      },
+      {
+        title: "SEOスコア",
+        value: selectedDomain.seoScore?.toString() || "--",
+        change: "最新分析結果",
+        changeType: "increase" as const,
+        icon: TrendingUp,
+        iconColor: "text-primary"
+      }
+    ];
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-subtle">
       <AdminHeader title="ダッシュボード" />
       
       <main className="flex-1 p-6 space-y-6">
+        {/* Domain Status */}
+        <div className="mb-6">
+          {selectedDomain ? (
+            <div className="flex items-center gap-4 p-4 bg-gradient-card border border-border/50 rounded-lg">
+              <Globe className="h-8 w-8 text-primary" />
+              <div>
+                <h2 className="text-xl font-semibold text-card-foreground">
+                  現在選択中: {selectedDomain.domain}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDomain.description || "このドメインのSEO分析データを表示しています"}
+                </p>
+              </div>
+              {selectedDomain.seoScore && (
+                <Badge 
+                  variant={selectedDomain.seoScore >= 80 ? "default" : selectedDomain.seoScore >= 60 ? "secondary" : "destructive"}
+                  className="ml-auto"
+                >
+                  SEOスコア: {selectedDomain.seoScore}
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 p-4 bg-gradient-card border border-border/50 rounded-lg">
+              <AlertTriangle className="h-8 w-8 text-warning" />
+              <div>
+                <h2 className="text-xl font-semibold text-card-foreground">
+                  ドメインが選択されていません
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  全体の統計を表示しています。詳細な分析を行うにはドメインを選択してください。
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsData.map((stat, index) => (
+          {getStatsData().map((stat, index) => (
             <StatsCard
               key={index}
               title={stat.title}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AdminHeader } from "@/components/AdminHeader";
+import { useDomain } from "@/contexts/DomainContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,15 +68,18 @@ export default function SiteAnalytics() {
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [domains, setDomains] = useState<SeoDomain[]>([]);
+  const { selectedDomain } = useDomain();
 
   useEffect(() => {
     // Load domains
     setDomains(loadDomains());
     
-    // Check for domain parameter from URL
+    // Check for domain parameter from URL or selected domain
     const domainParam = searchParams.get("domain");
     if (domainParam) {
       setUrl(domainParam.startsWith("http") ? domainParam : `https://${domainParam}`);
+    } else if (selectedDomain) {
+      setUrl(selectedDomain.domain.startsWith("http") ? selectedDomain.domain : `https://${selectedDomain.domain}`);
     }
 
     // Load stored API key
@@ -83,7 +87,7 @@ export default function SiteAnalytics() {
     if (storedApiKey) {
       setApiKey(storedApiKey);
     }
-  }, [searchParams]);
+  }, [searchParams, selectedDomain]);
 
   const handleAnalyze = async () => {
     if (!url || !apiKey) {
@@ -198,7 +202,7 @@ export default function SiteAnalytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              ウェブサイト分析
+              ウェブサイト分析・改善提案
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -494,6 +498,73 @@ export default function SiteAnalytics() {
               </Card>
             </div>
 
+            {/* 改善サマリー */}
+            <div className="grid gap-6 md:grid-cols-4">
+              <Card className="bg-gradient-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">
+                    コンテンツ改善
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-card-foreground">
+                    {result.contentSuggestions?.length || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    高優先度: {result.contentSuggestions?.filter(s => s.priority === "high").length || 0}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">
+                    技術的改善
+                  </CardTitle>
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-card-foreground">
+                    {result.technicalSuggestions?.length || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    高優先度: {result.technicalSuggestions?.filter(s => s.priority === "high").length || 0}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">
+                    実装進捗
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-card-foreground">0%</div>
+                  <p className="text-xs text-muted-foreground">
+                    未実装項目
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card border-border/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground">
+                    期待効果
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-card-foreground">+40%</div>
+                  <p className="text-xs text-muted-foreground">
+                    検索流入向上
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* コンテンツ改善提案 */}
             {result.contentSuggestions && result.contentSuggestions.length > 0 && (
               <Card className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-card/95 via-card to-card/90 backdrop-blur-sm shadow-xl">
@@ -523,9 +594,14 @@ export default function SiteAnalytics() {
                         <p className="text-sm text-muted-foreground mb-2">
                           {suggestion.description}
                         </p>
-                        <p className="text-xs text-primary font-medium">
-                          期待効果: {suggestion.estimatedImpact}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-primary font-medium">
+                            期待効果: {suggestion.estimatedImpact}
+                          </p>
+                          <Button size="sm" variant="outline">
+                            実装開始
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -562,15 +638,84 @@ export default function SiteAnalytics() {
                         <p className="text-sm text-muted-foreground mb-2">
                           {suggestion.description}
                         </p>
-                        <p className="text-xs text-success font-medium">
-                          実装方法: {suggestion.implementation}
-                        </p>
+                        <div className="bg-muted/20 p-3 rounded-lg mb-3">
+                          <p className="text-xs text-success font-medium">
+                            実装方法: {suggestion.implementation}
+                          </p>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button size="sm" variant="outline">
+                            実装ガイド
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             )}
+
+            {/* 実装タイムライン */}
+            <Card className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-card/95 via-card to-card/90 backdrop-blur-sm shadow-xl">
+              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-1">
+                <CardHeader className="bg-card/50 backdrop-blur-sm">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Clock className="h-5 w-5 text-primary" />
+                    </div>
+                    実装タイムライン
+                  </CardTitle>
+                </CardHeader>
+              </div>
+              <CardContent className="p-6">
+                <div className="grid gap-6 md:grid-cols-3">
+                  {/* 即座に対応 */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-success flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      即座に対応（1週間以内）
+                    </h4>
+                    <div className="space-y-2">
+                      {["メタディスクリプション最適化", "alt属性の追加", "タイトルタグ改善"].map((item, index) => (
+                        <div key={index} className="p-2 rounded bg-success/10 border border-success/20">
+                          <p className="text-xs text-success">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 短期対応 */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-warning flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      短期対応（1ヶ月以内）
+                    </h4>
+                    <div className="space-y-2">
+                      {["画像最適化", "モバイル最適化", "ページ速度改善"].map((item, index) => (
+                        <div key={index} className="p-2 rounded bg-warning/10 border border-warning/20">
+                          <p className="text-xs text-warning">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 長期対応 */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-primary flex items-center gap-2">
+                      <MousePointer className="w-4 h-4" />
+                      長期対応（3ヶ月以内）
+                    </h4>
+                    <div className="space-y-2">
+                      {["ブログセクション追加", "構造化データ実装", "コンテンツ戦略策定"].map((item, index) => (
+                        <div key={index} className="p-2 rounded bg-primary/10 border border-primary/20">
+                          <p className="text-xs text-primary">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </main>

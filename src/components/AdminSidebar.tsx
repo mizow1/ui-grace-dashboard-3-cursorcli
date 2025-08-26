@@ -48,19 +48,13 @@ const navigationItems = [
     title: "サイト分析",
     url: "/site-analytics",
     icon: BarChart3,
-    description: "サイト解析"
+    description: "サイト解析・改善提案"
   },
   {
     title: "競合サイト分析",
     url: "/competitor-analysis",
     icon: Target,
     description: "競合調査"
-  },
-  {
-    title: "サイト提案",
-    url: "/site-suggestions",
-    icon: Lightbulb,
-    description: "改善提案"
   },
   {
     title: "コンテンツ提案",
