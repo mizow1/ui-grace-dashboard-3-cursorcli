@@ -26,15 +26,15 @@ print_error() {
 
 # デプロイディレクトリの設定
 DEPLOY_DIR="/root/ui-grace-dashboard-3-cursorcli"
-BACKUP_DIR="/home/seouser/backups"
+BACKUP_DIR="/root/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # バックアップ作成
 print_info "現在のデプロイメントをバックアップ中..."
 mkdir -p $BACKUP_DIR
 if [ -d "$DEPLOY_DIR" ]; then
-    tar czf $BACKUP_DIR/seo-dashboard_$DATE.tar.gz -C /var/www seo-dashboard
-    print_success "バックアップ作成完了: seo-dashboard_$DATE.tar.gz"
+    tar czf $BACKUP_DIR/ui-grace-dashboard-3-cursorcli_$DATE.tar.gz -C /root ui-grace-dashboard-3-cursorcli
+    print_success "バックアップ作成完了: ui-grace-dashboard-3-cursorcli_$DATE.tar.gz"
 fi
 
 # GitHubから最新コードを取得
@@ -67,7 +67,7 @@ fi
 
 # PM2でアプリケーション再起動
 print_info "アプリケーションを再起動中..."
-pm2 restart seo-dashboard || {
+pm2 restart ui-grace-dashboard-3 || {
     print_warning "PM2再起動に失敗しました。初回起動を試みます..."
     pm2 start ecosystem.config.js
 }
@@ -87,12 +87,12 @@ if curl -f http://127.0.0.1:3001/api/health > /dev/null 2>&1; then
     print_success "アプリケーション起動確認完了"
 else
     print_error "アプリケーションの起動確認に失敗しました"
-    print_info "PM2ログを確認してください: pm2 logs seo-dashboard"
+    print_info "PM2ログを確認してください: pm2 logs ui-grace-dashboard-3"
 fi
 
 # 古いバックアップの削除（30日以上前）
 print_info "古いバックアップを削除中..."
-find $BACKUP_DIR -name "seo-dashboard_*.tar.gz" -mtime +30 -delete
+find $BACKUP_DIR -name "ui-grace-dashboard-3-cursorcli_*.tar.gz" -mtime +30 -delete
 print_success "古いバックアップ削除完了"
 
 # デプロイ完了メッセージ

@@ -37,9 +37,9 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         port: ${{ secrets.VPS_PORT }}
         script: |
-          cd /var/www/seo-dashboard
+          cd /root/ui-grace-dashboard-3-cursorcli
           git pull origin main
           npm install
           npm run build
-          pm2 restart seo-dashboard
+          pm2 restart ui-grace-dashboard-3
           echo "Deployment completed at $(date)"
