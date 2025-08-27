@@ -25,7 +25,7 @@ print_error() {
 }
 
 # デプロイディレクトリの設定
-DEPLOY_DIR="/var/www/seo-dashboard"
+DEPLOY_DIR="/root/ui-grace-dashboard-3-cursorcli"
 BACKUP_DIR="/home/seouser/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 
