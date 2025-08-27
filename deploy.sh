@@ -45,7 +45,7 @@ print_success "最新コード取得完了"
 
 # 依存関係のインストール
 print_info "依存関係をインストール中..."
-npm install --production
+npm install
 print_success "依存関係インストール完了"
 
 # TypeScript/ESLintチェック
