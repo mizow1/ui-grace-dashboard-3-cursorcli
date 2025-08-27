@@ -69,7 +69,7 @@ fi
 print_info "アプリケーションを再起動中..."
 pm2 restart ui-grace-dashboard-3 || {
     print_warning "PM2再起動に失敗しました。初回起動を試みます..."
-    pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.cjs
 }
 print_success "アプリケーション再起動完了"
 
